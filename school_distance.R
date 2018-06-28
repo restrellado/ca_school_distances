@@ -1,10 +1,13 @@
 library(tidyverse)
 library(readxl) 
 library(here)
+library(geosphere)
 
 #------------------------------------------------------------------------------
 
-raw_data <- read_excel(here("data", "pubschls.xlsx"))
+# TODO: Resolve data related warnings 
+raw_data <- read_excel(here("data", "pubschls.xlsx")) %>% 
+  mutate_at(vars(Longitude, Latitude), funs(as.numeric))
 
 #------------------------------------------------------------------------------
 
@@ -18,6 +21,7 @@ schools
 #------------------------------------------------------------------------------
 
 # Check for NAs 
+# NAs may be school district rows 
 schools %>% map(~mean(is.na(.))) 
 
 #------------------------------------------------------------------------------
@@ -25,3 +29,16 @@ schools %>% map(~mean(is.na(.)))
 # Look at missing long and lat 
 schools %>% 
   filter(is.na(Longitude)) 
+
+#------------------------------------------------------------------------------
+
+# Coronado Dataset 
+coro <- schools %>% 
+  filter(District == "Coronado Unified") %>% 
+  select(longitude = Longitude, latitude = Latitude) 
+coro
+
+#------------------------------------------------------------------------------
+
+# Create distance matrix 
+distm(coro, coro)
