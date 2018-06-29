@@ -20,34 +20,28 @@ schools
 
 #------------------------------------------------------------------------------
 
-# Check for NAs 
-# NAs may be school district rows 
-schools %>% map(~mean(is.na(.))) 
+# Function 
+
+calc_dist <- function(data) {
+  # Summarizes distances between schools 
+  #   Args
+  #    data: a tibble of school locations from CDE 
+  #   Returns 
+  #    Mean of distance matrix rows 
+  data <- data %>% 
+    # Remove district row
+    filter(!is.na(School)) %>% 
+    select(School, longitude = Longitude, latitude = Latitude) 
+  
+  # Create distance matrix 
+  mat <- distm(data[, c(2, 3)], data[, c(2,3)]) %>% 
+    as.tibble() %>% 
+    # Convert meters to miles
+    mutate_all(funs(. * 0.000621371))
+  
+  # Take mean of the columns, then mean of result
+  mean(mat %>% map_dbl(mean)) 
+}
 
 #------------------------------------------------------------------------------
 
-# Look at missing long and lat 
-schools %>% 
-  filter(is.na(Longitude)) 
-
-#------------------------------------------------------------------------------
-
-# Coronado Dataset 
-coro <- schools %>% 
-  filter(District == "Coronado Unified") %>% 
-  select(School, longitude = Longitude, latitude = Latitude) 
-coro
-
-#------------------------------------------------------------------------------
-
-# Create distance matrix 
-mat <- distm(coro[, c(2, 3)], coro[, c(2,3)]) %>% 
-  as.tibble() %>% 
-  # Convert meters to miles
-  mutate_all(funs(. * 0.000621371))
-mat
-
-#------------------------------------------------------------------------------
-
-# Take mean of the columns, then mean of result
-mean(mat %>% map_dbl(mean))
