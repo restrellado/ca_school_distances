@@ -47,4 +47,8 @@ calc_dist <- function(data) {
 
 # Map calc_dist across all districts 
 # Output as dataframe
-distances <- schools %>% map_dbl(calc_dist) %>% enframe()
+distances <- schools %>% 
+  map_dbl(calc_dist) %>% 
+  enframe() %>% 
+  arrange(desc(value)) %>% 
+  mutate(rank = row_number())
