@@ -35,10 +35,19 @@ schools %>%
 # Coronado Dataset 
 coro <- schools %>% 
   filter(District == "Coronado Unified") %>% 
-  select(longitude = Longitude, latitude = Latitude) 
+  select(School, longitude = Longitude, latitude = Latitude) 
 coro
 
 #------------------------------------------------------------------------------
 
 # Create distance matrix 
-distm(coro, coro)
+mat <- distm(coro[, c(2, 3)], coro[, c(2,3)]) %>% 
+  as.tibble() %>% 
+  # Convert meters to miles
+  mutate_all(funs(. * 0.000621371))
+mat
+
+#------------------------------------------------------------------------------
+
+# Take mean of the columns, then mean of result
+mean(mat %>% map_dbl(mean))
