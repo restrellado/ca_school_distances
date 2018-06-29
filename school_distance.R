@@ -12,11 +12,11 @@ raw_data <- read_excel(here("data", "pubschls.xlsx")) %>%
 #------------------------------------------------------------------------------
 
 schools <- raw_data %>% 
-  # Remove all but Active 
+  # Remove all but Active and remove district entries
   # Merged records are missing location data 
-  filter(StatusType %in% c("Active")) %>% 
-  select(SOC, County, District, School, Longitude, Latitude)
-schools
+  filter(StatusType %in% c("Active"), !is.na(School)) %>% 
+  select(SOC, County, District, School, Longitude, Latitude) %>% 
+  split(.$District) 
 
 #------------------------------------------------------------------------------
 
@@ -45,3 +45,6 @@ calc_dist <- function(data) {
 
 #------------------------------------------------------------------------------
 
+# Map calc_dist across all districts 
+# Output as dataframe
+distances <- schools %>% map_dbl(calc_dist) %>% enframe()
